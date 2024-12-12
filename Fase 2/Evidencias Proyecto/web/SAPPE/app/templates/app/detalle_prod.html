@@ -1,0 +1,77 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block nombre %} Detalle de Producto {% endblock %}
+
+{% block contenido %}
+<div class="row mt-5">
+    {% for prod in producto %}
+    <!------------------- Imagen producto ------------------->
+    <div class="col-md-6">
+        <img class="align-self-center" src="{{ prod.img.url }}" style="width: 550px; height: 450px;">
+    </div>
+
+    <!------------------- Descripción ------------------->
+    <div class="col-md-6 d-flex flex-column justify-content-between">
+        <div>
+            {% if precio_con_descuento < prod.precio_unitario %}
+        <div class="d-flex">
+            <h4 class="card-text me-2" style="font-weight: bold; text-decoration: line-through; color: gray;">
+                ${{ prod.precio_unitario|intcomma }}
+            </h4>
+            <h4 class="card-text" style="font-weight: bold;">${{ precio_con_descuento|intcomma }}</h4>
+        </div>
+    {% else %}
+        <h4 class="card-text" style="font-weight: bold;">${{ prod.precio_unitario|intcomma }}</h4>
+    {% endif %}
+
+        <h1>{{ prod.nombre_producto }}</h1>
+        <div class="justify-content-center">
+            <p>{{ prod.descripcion }}</p>
+            {% if fecha_vencimiento %}
+            <p>Fecha de vencimiento: {{ fecha_vencimiento }}</p>
+            {% else %}
+            <p>Este producto no tiene fecha de vencimiento.</p>
+            {% endif %}
+
+        </div>
+    </div>
+    <div class="d-grid gap-2">
+      <p class="card-text">Stock: {{ stock|intcomma }}</p>
+      {% if stock > 0 %}
+      <button class="btn btn-outline-dark comprar-btn" data-url="{% url 'Add' prod.id_producto %}" data-name="{{ prod.nombre_producto }}">Agregar al carro</button>
+      {% else %}
+      <p>Producto sin stock</p>
+      {% endif %}
+    </div>
+</div>
+{% endfor %}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const comprarButtons = document.querySelectorAll('.comprar-btn');
+
+    comprarButtons.forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const productName = this.dataset.name;
+        const productUrl = this.dataset.url;
+
+        Swal.fire({
+          title: `¿Deseas agregar "${productName}" al carrito?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, agregar',
+          cancelButtonText: 'Cancelar',
+        }).then(result => {
+          if (result.isConfirmed) {
+            window.location.href = productUrl;
+          }
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

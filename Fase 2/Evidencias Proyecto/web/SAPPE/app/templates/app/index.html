@@ -1,0 +1,153 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block nombre %} Inicio {% endblock %}
+
+{% block pagina %}
+<div class="page-header">
+  <p style="font-weight: bolder;">Inicio</p>
+</div>
+{% endblock %}
+
+{% block contenido %}
+
+<div id="carouselExampleCaptions" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="5000">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+      aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="{% static 'app/img/carrusel1.png' %}" class="d-block w-100" alt="..." style="height: 550px;">
+    </div>
+    <div class="carousel-item">
+      <img src="{% static 'app/img/carrusel2.png' %}" class="d-block w-100" alt="..." style="height: 550px;">
+    </div>
+    <div class="carousel-item">
+      <img src="{% static 'app/img/3carrusel.png' %}" class="d-block w-100" alt="..." style="height: 550px;">
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+<div class="my-3">
+  <h2>Ofertas especiales</h2>
+  <div class="d-flex overflow-x-auto">
+    {% for prod in productos %}
+    {% if prod.descuento %}
+    <div class="col-md-3 my-3">
+      <div class="card card-product" style="width: 18rem;">
+        <img src="{{ prod.img.url }}" class="card-img-top" alt="..." style="height: 220px; object-fit: contain;">
+        <div class="card-body">
+          {% if prod.descuento %}
+          <div class="descuento">
+            <span style="background: #bc2626;">-{{ prod.descuento }}%</span>
+          </div>
+          {% endif %}
+          <a class="stretched-link" href="{% url 'detalle_prod' prod.id_producto %}"></a>
+          <h5 class="card-title">{{ prod.nombre_producto }}</h5>
+          <p class="card-text">{{ prod.descripcion|truncatechars:25 }}</p>
+          <div class="d-flex justify-content-between">
+            {% if prod.descuento %}
+            <div class="d-flex">
+              <p class="card-text me-2" style="font-weight: bold; text-decoration: line-through; color: gray;">
+                ${{ prod.precio_unitario|intcomma }}
+              </p>
+              <p class="card-text" style="font-weight: bold;">${{ prod.nuevo_precio|intcomma }}</p>
+            </div>
+            {% else %}
+            <p class="card-text" style="font-weight: bold;">${{ prod.precio_unitario|intcomma }}</p>
+            {% endif %}
+            <p class="card-text">Stock: {{ prod.stock }}</p>
+          </div>
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'Add' prod.id_producto %}" class="btn btn-outline-dark w-100">Comprar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<div class="row my-3">
+  <h2>Recomendaciones</h2>
+  {% for prod in productos %}
+  {% if not prod.descuento %}
+  <div class="col-md-3 my-3">
+    <div class="card card-product" style="width: 18rem;">
+      <img src="{{ prod.img.url }}" class="card-img-top" alt="..." style="height: 220px; object-fit: contain;">
+      <div class="card-body">
+        {% if prod.descuento %}
+        <div class="descuento">
+          <span style="background: #bc2626;">-{{ prod.descuento }}%</span>
+        </div>
+        {% endif %}
+        <a class="stretched-link" href="{% url 'detalle_prod' prod.id_producto %}"></a>
+        <h5 class="card-title">{{ prod.nombre_producto }}</h5>
+        <p class="card-text">{{ prod.descripcion|truncatechars:25 }}</p>
+        <div class="d-flex justify-content-between">
+          {% if prod.descuento %}
+          <div class="d-flex">
+            <p class="card-text me-2" style="font-weight: bold; text-decoration: line-through; color: gray;">
+              ${{ prod.precio_unitario|intcomma }}
+            </p>
+            <p class="card-text" style="font-weight: bold;">${{ prod.nuevo_precio|intcomma }}</p>
+          </div>
+          {% else %}
+          <p class="card-text" style="font-weight: bold;">${{ prod.precio_unitario|intcomma }}</p>
+          {% endif %}
+          <p class="card-text">Stock: {{ prod.stock }}</p>
+        </div>
+        <div class="d-flex justify-content-center">
+          {% if prod.stock == 0 %}
+          <p>Producto sin stock</p>
+          {% else %}
+          <a class="btn btn-outline-dark w-75 comprar-producto" data-url="{% url 'Add' prod.id_producto %}">
+            Comprar
+          </a>
+          {% endif %}
+        </div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const buyButtons = document.querySelectorAll('.comprar-producto');
+            buyButtons.forEach(button => {
+              button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.dataset.url;
+                Swal.fire({
+                  title: '¿Confirmar compra?',
+                  text: "¿Deseas agregar este producto al carrito?",
+                  icon: 'question',
+                  showCancelButton: true,
+                  confirmButtonColor: '#3085d6',
+                  cancelButtonColor: '#d33',
+                  confirmButtonText: 'Sí, comprar',
+                  cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = url;
+                  }
+                });
+              });
+            });
+          });
+        </script>
+
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

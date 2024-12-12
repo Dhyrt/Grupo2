@@ -1,0 +1,70 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block nombre %}
+Error 404
+{% endblock %}
+
+{% block contenido %}
+<style>
+    body{
+        background-image: url(../../static/app/img/error404.png);
+        background-position: center center;
+        background-size: cover;
+    }
+    /* Estilo del título Error 404 */
+.error-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: #ff4d4d;  /* Rojo brillante para llamar la atención */
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3); /* Sombra suave */
+    margin-bottom: 20px;
+    transform: translateY(-50px);
+    opacity: 0;
+    animation: slideIn 1s forwards;
+}
+
+/* Estilo del subtítulo Página no encontrada */
+.error-message {
+    font-family: 'Roboto', sans-serif;
+    font-size: 2rem;
+    color: #555;
+    margin-top: 0;
+    transform: translateY(50px);
+    opacity: 0;
+    animation: slideIn 1.2s forwards;
+    animation-delay: 0.5s; /* Retraso para el subtítulo */
+}
+
+/* Animación de aparición */
+@keyframes slideIn {
+    0% {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Estilo de los títulos en dispositivos pequeños */
+@media (max-width: 768px) {
+    .error-title {
+        font-size: 3rem;
+    }
+
+    .error-message {
+        font-size: 1.5rem;
+    }
+}
+</style>
+<div class="mt-5 min-vh-100 d-flex justify-content-center">
+    <div class="text-center mt-5">
+        <h1 class="error-title">Error 404</h1>
+        <h2 class="error-message">Página no encontrada</h2>
+    </div>
+</div>
+
+{% endblock %}

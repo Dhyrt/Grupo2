@@ -1,0 +1,91 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block nombre %} Detalle Boleta {% endblock %}
+
+{% block contenido %}
+<div class="mt-4">
+  <div class="card mb-4 pdf-content">
+    <div class="card-header">
+      {% for orden in orden %}
+      <h5 class="card-title pt-2">Codigo Orden: #{{ orden.id_orden }}</h5>
+      {% endfor %}
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="card-subtitle mb-2 text-muted">Informacion del Cliente</h6>
+          {% for orden in orden %}
+          <p><strong>Nombre del Cliente:</strong> {{ orden.cliente.username }}</p>
+          <!-- Muestra el nombre del cliente -->
+          <p><strong>Direccion:</strong> {{ orden.direccion }}</p>
+          <p><strong>Telefono:</strong> {{ orden.telefono }}</p>
+          <p><strong>Codigo Postal:</strong> {{ orden.codigo_postal }}</p>
+          <p><strong>RUT:</strong> {{ orden.rut }}</p>
+          {% endfor %}
+        </div>
+        <div class="col-md-6">
+          <h6 class="card-subtitle mb-2 text-muted">Detalles de la Orden</h6>
+          {% for orden in orden %}
+          <p><strong>Estado de entrega:</strong> {{ orden.estado_entrega }}</p>
+          <p><strong>Metodo de pago:</strong> {{ orden.metodo_pago }}</p>
+          <p><strong>Fecha de la compra:</strong> {{ boleta.fecha }}</p>
+          {% endfor %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-md-12">
+          <h6 class="card-subtitle mb-2 text-muted">Productos</h6>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Precio Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prod in productos_boleta %}
+                <tr>
+                  <td>{{ prod.id_producto.nombre_producto }}</td>
+                  <td>{{ prod.cantidad }}</td>
+                  <td>${{ prod.precio_unitario }}</td>
+                  <td>${{ prod.precio_total }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="card-subtitle mb-2 text-muted">Totales:</h6>
+            <p><strong>Subtotal:</strong> ${{ boleta.subtotal }}</p>
+            <p><strong>IVA:</strong> ${{ boleta.iva }}</p>
+            <p><strong>Descuentos:</strong> ${{ boleta.descuentos }}</p>
+            <p><strong>Total:</strong> ${{ boleta.total }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="my-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{% url 'detalle_boleta' id_boleta=boleta.id_boleta %}?download=pdf"
+           class="btn btn-outline-primary">
+            Descargar PDF
+        </a>
+        {% if boleta.estado_boleta.estado_boleta|lower != "anulada" and orden.0.estado_entrega.estado_entrega|lower != "entregado" %}
+        <form method="POST" action="{% url 'detalle_boleta' boleta.id_boleta %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+                Cancelar orden
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+{% endblock %}

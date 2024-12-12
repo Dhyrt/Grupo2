@@ -1,0 +1,16 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block nombre %} Compra exitosa {% endblock %}
+
+{% block contenido %}
+<div class="mt-3">
+    <div class="d-flex flex-column align-items-center">
+        <img class="my-3" src="{% static 'app/img/exito.png' %}" style="width: 100px; height: 100px;">
+        <h2>¡Compra exitosa!</h2>
+        <h5>El codigo de tu compra es: <strong>{{ orden.id_orden }}</strong></h5>
+        <p>Gracias por tu compra, tu pedido ha sido procesado exitosamente.</p>
+        <p>Puedes ver y descargar tu boleta <a href="{% url 'detalle_boleta' boleta.id_boleta %}">aquí</a></p>
+    </div>
+</div>
+{% endblock %}

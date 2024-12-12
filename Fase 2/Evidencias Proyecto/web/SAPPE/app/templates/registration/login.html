@@ -1,0 +1,47 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block nombre %}
+Iniciar sesión
+{% endblock %}
+{% load crispy_forms_tags %}
+{% block contenido %}
+<style>
+    .bg-login {
+        background-image: url(../../static/app/img/fondologin2.png);
+        background-position: center center;
+        background-size: cover;
+        border: 2px solid black;
+        border-radius: 5px 0px 0px 5px;
+        box-shadow: -4px 4px black
+    }
+</style>
+
+<div class="container mb-3 mt-5">
+    <div class="container w-75 mt-3 mb-5">
+        <div class="row align-items-stretch">
+            <div class="col bg-login d-none d-lg-block col-md-5 col-lg-5 col-xl-6">
+            </div>
+            <div class="card-form col w-75">
+                <div>
+                    <h2 class="fw-bold pt-4 text-center pb-3">Bienvenido</h2>
+                <div>
+                    <div class="row">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {{ form | crispy }}
+                            <div class="mt-3">
+                                <input type="submit" value="Ingresar" class="btn-form mt-3">
+                            </div>
+                            <div class="my-3">
+                                <span><a href="#">Recuperar mi contraseña</a></span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

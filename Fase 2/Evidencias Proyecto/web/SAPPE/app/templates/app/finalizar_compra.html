@@ -1,0 +1,116 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load humanize %} 
+{% block nombre %} Finalizar pedido {% endblock %}
+
+{% load crispy_forms_tags %}
+{% block contenido %}
+<div class="d-flex justify-content-center my-3">
+    <div class="card p-5" style="width: 100%; max-width: 800px;">
+        <div class="card-body">
+            <form id="form-pago" method="POST" action="" onsubmit="return verificarRut()">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="text-center mb-4">
+                        <h3>Datos de envío</h3>
+                    </div>
+                    <div class="form-group">
+                        {{ form.direccion | as_crispy_field }} 
+                    </div>
+                    <div class="form-group">
+                        {{ form.telefono | as_crispy_field }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.rut | as_crispy_field }}
+                        <small id="rutError" class="form-text text-danger" style="display: none;">RUT inválido. Por favor, ingrese un RUT válido.</small>
+                    </div>
+                    <div class="form-group">
+                        {{ form.codigo_postal | as_crispy_field }}
+                    </div>
+                </div>
+                <input type="hidden" id="metodo_pago" name="metodo_pago" value="">
+                <input type="hidden" name="id_boleta" value="{{ boleta.id_boleta }}">
+                <div class="text-right mt-3">
+                    <button type="submit" class="btn btn-outline-primary w-100 mb-3" onclick="document.getElementById('metodo_pago').value='Efectivo';">Pago en Efectivo</button>
+                    <div id="paypal-button-container"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Integración WS PayPal -->
+<script src="https://www.paypal.com/sdk/js?client-id=AVRTJKPEw_iwqNXOKY0sweRXqY0JqFsn47anawv9YnFAO_zb6bM63duFD5J2GPZt8Rl250ngSwamYRp0&components=buttons,funding-eligibility&currency=USD"></script>
+<script>
+    const url = 'https://mindicador.cl/api/dolar';
+
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+        let valorDolar = data.serie[0].valor;
+        var totalCarro = parseFloat('{{ total }}'); 
+        var TotalDolar = (totalCarro / valorDolar).toFixed(2); 
+
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: TotalDolar
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    alert('Transacción completada por ' + details.payer.name.given_name);
+                    document.getElementById('metodo_pago').value='Paypal';
+                    document.getElementById('form-pago').submit();
+                });
+            },
+            onError: function (err) {
+                console.error('Error en la transacción de PayPal:', err);
+                alert('Hubo un error al procesar el pago con PayPal. Por favor, intenta de nuevo.');
+            }
+        }).render('#paypal-button-container');
+    })
+    .catch(error => {
+        console.error('Error al obtener el valor del dólar:', error);
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('form-pago');
+        const paypalContainer = document.getElementById('paypal-button-container');
+        const inputs = form.querySelectorAll('input, select, textarea'); // Incluye todos los campos relevantes del formulario
+        
+        // Oculta inicialmente el botón de PayPal
+        paypalContainer.style.display = 'none';
+
+        function validarForm() {
+            // Verifica si todos los campos tienen valor
+            let isValid = true;
+            inputs.forEach(input => {
+                if (input.type !== 'hidden' && !input.value.trim()) {
+                    isValid = false;
+                }
+            });
+
+            // Muestra u oculta el contenedor de PayPal
+            if (isValid) {
+                paypalContainer.style.display = 'block';
+            } else {
+                paypalContainer.style.display = 'none';
+            }
+        }
+
+        // Agrega un evento a cada campo para validar el formulario en tiempo real
+        inputs.forEach(input => {
+            input.addEventListener('input', validarForm);
+        });
+
+        // Valida inicialmente en caso de campos prellenados
+        validarForm();
+    });
+</script>
+{% endblock %}

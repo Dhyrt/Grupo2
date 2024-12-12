@@ -1,0 +1,91 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block nombre %} Perfil {% endblock %}
+
+{% block contenido %}
+<div class="d-flex flex-column align-items-center my-3">
+    <div class="card w-75 p-5 my-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="text-center mb-4">
+                    <h3>Datos de usuario</h3>
+                </div>
+                <div class="form-group">
+                    <label for="nombre">Nombre de usuario</label>
+                    <input type="text" class="form-control" id="nombre" value="{{ user.username }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo</label>
+                    <input type="email" class="form-control" id="email" value="{{ user.email }}" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card w-75 p-5 my-4">
+        <h2 class="mb-3">Historial de compras</h2>
+
+        <form class="input-group w-45 mb-4" method="GET" action="{% url 'perfil' %}">
+            <label for="ordenamiento">Ordenar por:</label>
+            <select class="ms-3 form-select" id="ordenamiento" name="ordenamiento">
+                <option value="recientes" {% if ordenamiento == 'recientes' %}selected{% endif %}>Más Recientes</option>
+                <option value="antiguos" {% if ordenamiento == 'antiguos' %}selected{% endif %}>Más Antiguos</option>
+            </select>
+            <button type="submit" class="btn btn-outline-primary">Aplicar</button>
+        </form>
+
+        {% if historial_compras %}
+        <table class="table table-hover">
+            <thead>
+                <th class="py-3">Codigo de compra</th>
+                <th class="py-3">Fecha</th>
+                <th class="py-3">Estado</th>
+                <th class="py-3"></th>
+            </thead>
+            <tbody>
+            {% for compra in historial_compras %}
+            <tr>
+                <td class="py-3"><strong>#{{ compra.orden.id_orden }}</strong></td>
+                <td class="py-3">{{ compra.boleta.fecha }}</td>
+                <td class="py-3">{{ compra.orden.estado_entrega }}</td>
+                <td class="py-3"><a href="{% url 'detalle_boleta' compra.boleta.id_boleta %}" class="nav-link">Detalles</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No tienes compras.</p>
+        {% endif %}
+    </div>
+    <form class="w-75 my-3" id="logout-form" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button id="logout-button" class="btn btn-outline-primary w-30" type="submit">Cerrar Sesión</button>
+    </form>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const logoutButton = document.getElementById('logout-button');
+    const logoutForm = document.getElementById('logout-form');
+    logoutButton.addEventListener('click', function (e) {
+      e.preventDefault();
+      Swal.fire({
+        title: '¿Cerrar sesión?',
+        text: "Se cerrará tu sesión actual.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          logoutForm.submit();
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock %}

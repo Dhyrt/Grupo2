@@ -1,0 +1,146 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block nombre %} Productos {% endblock %}
+
+{% block pagina %}
+<div class="page-header">
+  <p style="font-weight: bolder;">Productos</p>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<form method="GET" action="{% url 'productos' %}">
+  <div class="d-flex mb-3">
+    <div class="form-group col-md-2">
+      <select class="form-control" id="categoria" name="categoria">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+        <option value="{{ cat.nombre_categoria }}" {% if request.GET.categoria == cat.nombre_categoria %}selected{% endif %}>
+            {{ cat.nombre_categoria }}
+        </option>
+        {% endfor %}
+    </select>
+    </div>
+    <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+  </div>
+</form>
+
+{% if search_query %}
+<h2>Resultados de la búsqueda para "{{ search_query }}":</h2>
+<div class="row mb-5">
+  {% for prod in search_results %}
+  <div class="col-md-3 mb-3">
+    <div class="card card-product" style="width: 18rem;">
+      <img src="{{ prod.img.url }}" class="card-img-top" alt="{{ prod.nombre_producto }}"
+        style="height: 220px; object-fit: contain;">
+      <div class="card-body">
+        {% if prod.descuento %}
+        <div class="descuento">
+          <span style="background: #bc2626;">-{{ prod.descuento }}%</span>
+        </div>
+        {% endif %}
+        <a class="stretched-link" href="{% url 'detalle_prod' prod.id_producto %}"></a>
+        <h5 class="card-title">{{ prod.nombre_producto }}</h5>
+        <p class="card-text">{{ prod.descripcion|truncatechars:25}}</p>
+        <div class="d-flex justify-content-between">
+          {% if prod.descuento %}
+          <div class="d-flex">
+            <p class="card-text me-2" style="font-weight: bold; text-decoration: line-through; color: gray;">
+              ${{ prod.precio_unitario|intcomma }}
+            </p>
+            <p class="card-text" style="font-weight: bold;">${{ prod.nuevo_precio|intcomma }}</p>
+          </div>
+          {% else %}
+          <p class="card-text" style="font-weight: bold;">${{ prod.precio_unitario|intcomma }}</p>
+          {% endif %}
+          <p class="card-text">Stock: {{ prod.stock }}</p>
+        </div>
+        <div class="d-flex justify-content-between">
+          {% if prod.stock > 0 %}
+          <button class="btn btn-outline-dark w-100 comprar-btn" data-url="{% url 'Add' prod.id_producto %}"
+            data-name="{{ prod.nombre_producto }}">Comprar</button>
+          {% else %}
+          <p>Producto sin stock</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>No se encontraron resultados para tu búsqueda.</p>
+  {% endfor %}
+</div>
+{% else %}
+<div class="row mb-5">
+  {% for prod in productos %}
+  <div class="col-md-3 mb-3">
+    <div class="card card-product" style="width: 18rem;">
+      <img src="{{ prod.img.url }}" class="card-img-top" alt="{{ prod.nombre_producto }}"
+        style="height: 220px; object-fit: contain;">
+      <div class="card-body">
+        {% if prod.descuento %}
+        <div class="descuento">
+          <span style="background: #bc2626;">-{{ prod.descuento }}%</span>
+        </div>
+        {% endif %}
+        <a class="stretched-link" href="{% url 'detalle_prod' prod.id_producto %}"></a>
+        <h5 class="card-title">{{ prod.nombre_producto }}</h5>
+        <p class="card-text">{{ prod.descripcion|truncatechars:25}}</p>
+        <div class="d-flex justify-content-between">
+          {% if prod.descuento %}
+          <div class="d-flex">
+            <p class="card-text me-2" style="font-weight: bold; text-decoration: line-through; color: gray;">
+              ${{ prod.precio_unitario|intcomma }}
+            </p>
+            <p class="card-text" style="font-weight: bold;">${{ prod.nuevo_precio|intcomma }}</p>
+          </div>
+          {% else %}
+          <p class="card-text" style="font-weight: bold;">${{ prod.precio_unitario|intcomma }}</p>
+          {% endif %}
+          <p class="card-text">Stock: {{ prod.stock }}</p>
+        </div>
+        <div class="d-flex justify-content-between">
+          {% if prod.stock > 0 %}
+          <button class="btn btn-outline-dark w-100 comprar-btn" data-url="{% url 'Add' prod.id_producto %}"
+            data-name="{{ prod.nombre_producto }}">Comprar</button>
+          {% else %}
+          <p>Producto sin stock</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const comprarButtons = document.querySelectorAll('.comprar-btn');
+
+    comprarButtons.forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const productName = this.dataset.name;
+        const productUrl = this.dataset.url;
+
+        Swal.fire({
+          title: `¿Deseas agregar "${productName}" al carrito?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, agregar',
+          cancelButtonText: 'Cancelar',
+        }).then(result => {
+          if (result.isConfirmed) {
+            window.location.href = productUrl;
+          }
+        });
+      });
+    });
+  });
+</script>
+{% endif %}
+
+
+
+{% endblock %}
